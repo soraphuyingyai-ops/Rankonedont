@@ -1,0 +1,8 @@
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let members=[];
+async function loadMembers(){try{members=await (await fetch('data/members.json')).json();}catch(e){members=[]} const count=String(members.length).padStart(2,'0'); if($('#count'))$('#count').textContent=count;if($('#heroCount'))$('#heroCount').textContent=count; render();}
+function avatar(m){if(m.image)return `<img src="${m.image}" alt="">`;return `<div class="avatar-fallback"><span>${m.name.split(' ').map(x=>x[0]).slice(0,2).join('')}</span></div>`}
+function render(){if(!$('#list'))return;const q=($('#search')?.value||'').toLowerCase().trim();const role=$('.filter.active')?.dataset.role||'ALL';const data=members.filter(m=>(role==='ALL'||m.role===role)&&(!q||`${m.name} ${m.id} ${m.role} ${m.tag}`.toLowerCase().includes(q)));$('#list').innerHTML=data.map((m,i)=>`<article class="member-row"><div class="row-index">${String(i+1).padStart(2,'0')}</div><div class="avatar">${avatar(m)}</div><div class="member-info"><div class="member-meta"><span>${m.id}</span><b>${m.role}</b></div><h2>${m.name}</h2><p>${m.tag}</p></div><a class="social" href="${m.social||'#'}" aria-label="profile">↗</a></article>`).join('');$('#empty').style.display=data.length?'none':'block'}
+$$('.filter').forEach(b=>b.onclick=()=>{$$('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()});$('#search')?.addEventListener('input',render);
+const sound=$('#soundBtn');if(sound)sound.onclick=()=>{sound.classList.toggle('on');sound.querySelector('span').textContent=sound.classList.contains('on')?'SOUND ON':'SOUND OFF';document.body.classList.toggle('sound-on',sound.classList.contains('on'));};
+loadMembers();
